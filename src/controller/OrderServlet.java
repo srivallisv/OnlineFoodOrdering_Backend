@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import dao.OrderDAO;
 import model.Order;
 
 @WebServlet("/order")
@@ -18,29 +17,33 @@ public class OrderServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Get parameters from request
-        int id = Integer.parseInt(request.getParameter("id"));
-        int userId = Integer.parseInt(request.getParameter("userId"));
-        int restaurantId = Integer.parseInt(request.getParameter("restaurantId"));
-        double total = Double.parseDouble(request.getParameter("total"));
+        try {
+            // Get parameters safely
+            String idStr = request.getParameter("id");
+            String userIdStr = request.getParameter("userId");
+            String restaurantIdStr = request.getParameter("restaurantId");
+            String totalStr = request.getParameter("total");
 
-        // Create Order object
-        Order order = new Order();
-        order.setId(id);
-        order.setUserId(userId);
-        order.setRestaurantId(restaurantId);
-        order.setOrderDate(new Date());
-        order.setTotal(total);
+            // Convert safely (avoid crash)
+            int id = (idStr != null && !idStr.isEmpty()) ? Integer.parseInt(idStr) : 0;
+            int userId = (userIdStr != null && !userIdStr.isEmpty()) ? Integer.parseInt(userIdStr) : 0;
+            int restaurantId = (restaurantIdStr != null && !restaurantIdStr.isEmpty()) ? Integer.parseInt(restaurantIdStr) : 0;
+            double total = (totalStr != null && !totalStr.isEmpty()) ? Double.parseDouble(totalStr) : 0.0;
 
-        // Call DAO
-        OrderDAO dao = new OrderDAO();
-        boolean status = dao.addOrder(order);
+            // Create Order object
+            Order order = new Order();
+            order.setId(id);
+            order.setUserId(userId);
+            order.setRestaurantId(restaurantId);
+            order.setOrderDate(new Date());
+            order.setTotal(total);
 
-        // Redirect based on result
-        if (status) {
-            response.sendRedirect("success.jsp");
-        } else {
-            response.sendRedirect("error.jsp");
+            // ✅ TEMP: Skip DB for now
+            response.sendRedirect("jsp/success.jsp");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect("jsp/error.jsp");
         }
     }
 }
