@@ -1,24 +1,36 @@
+<%@ page import="java.util.*" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
+
 <html>
 <head>
 <title>Cart</title>
 </head>
+
 <body style="font-family:Arial; text-align:center;">
 
-<h1>Online Food Ordering System</h1>
+<h1>Your Cart</h1>
 <hr>
 
-<h2>Cart</h2>
+<%
+List<String> cart = (List<String>) session.getAttribute("cart");
 
-<form action="CartServlet" method="post">
+if(cart != null && !cart.isEmpty()){
+    for(String item : cart){
+%>
 
-    Item Name: <input type="text" name="itemName" required><br><br>
-    Quantity: <input type="number" name="quantity" required><br><br>
-    Price: <input type="text" name="price" required><br><br>
+<p><%= item %></p>
 
-    <button type="submit">Proceed</button>
+<%
+    }
+} else {
+%>
+<p>Cart is empty</p>
+<%
+}
+%>
 
-</form>
+<br>
+<a href="home.jsp">Back to Home</a>
 
 </body>
 </html>
