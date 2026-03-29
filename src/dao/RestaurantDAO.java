@@ -1,40 +1,38 @@
 package dao;
 
-import model.DBConnection;
-import model.Restaurant;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import model.RestaurantBean;
 
 public class RestaurantDAO {
 
-    public boolean addRestaurant(Restaurant r){
-        String sql = "INSERT INTO restaurants (id, name, location) VALUES (?, ?, ?)";
-        try(Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1,r.getId());
-            ps.setString(2,r.getName());
-            ps.setString(3,r.getLocation());
-            ps.executeUpdate();
-            return true;
-        } catch(SQLException e){
-            e.printStackTrace();
-            return false;
-        }
-    }
+    public List<RestaurantBean> getRestaurants() {
 
-    public Restaurant getRestaurantById(int id){
-        String sql = "SELECT * FROM restaurants WHERE id=?";
-        try(Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1,id);
+        List<RestaurantBean> list = new ArrayList<>();
+
+        try {
+            Connection con = DBConnection.getConnection();
+
+            String sql = "SELECT * FROM restaurant";
+            PreparedStatement ps = con.prepareStatement(sql);
+
             ResultSet rs = ps.executeQuery();
-            if(rs.next()){
-                return new Restaurant(rs.getInt("id"),
-                                      rs.getString("name"),
-                                      rs.getString("location"));
+
+            while (rs.next()) {
+                RestaurantBean r = new RestaurantBean();
+
+                r.setRestaurantId(rs.getInt("restaurant_id"));
+                r.setName(rs.getString("name"));
+                r.setLocation(rs.getString("location"));
+
+                list.add(r);
             }
-        } catch(SQLException e){
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+
+        return list;
     }
 }

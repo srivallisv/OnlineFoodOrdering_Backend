@@ -1,42 +1,70 @@
 package dao;
 
-import model.DBConnection;
-import model.User;
 import java.sql.*;
+import model.UserBean;
 
 public class UserDAO {
 
-    public boolean addUser(User user){
-        String sql = "INSERT INTO users (id, name, email, password) VALUES (?, ?, ?, ?)";
-        try(Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1,user.getId());
-            ps.setString(2,user.getName());
-            ps.setString(3,user.getEmail());
-            ps.setString(4,user.getPassword());
-            ps.executeUpdate();
-            return true;
-        } catch(SQLException e){
-            e.printStackTrace();
-            return false;
-        }
-    }
+    // LOGIN
+	public boolean validateUser(UserBean user) {
+	    boolean status = false;
 
-    public User getUserById(int id){
-        String sql = "SELECT * FROM users WHERE id=?";
-        try(Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1,id);
-            ResultSet rs = ps.executeQuery();
-            if(rs.next()){
-                return new User(rs.getInt("id"),
-                                rs.getString("name"),
-                                rs.getString("email"),
-                                rs.getString("password"));
+	    try {
+	        Connection con = DBConnection.getConnection();
+
+	        String sql = "SELECT * FROM users WHERE email=? AND password=?";
+	        PreparedStatement ps = con.prepareStatement(sql);
+
+	        String email = user.getEmail().trim();
+	        String password = user.getPassword().trim();
+
+	        System.out.println("Checking Email: " + email);
+	        System.out.println("Checking Password: " + password);
+
+	        ps.setString(1, email);
+	        ps.setString(2, password);
+
+	        ResultSet rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            System.out.println("User found in DB");
+	            status = true;
+	        } else {
+	            System.out.println("No match found in DB");
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return status;
+	}
+
+    // REGISTER
+    public boolean registerUser(UserBean user) {
+        boolean status = false;
+
+        try {
+            Connection con = DBConnection.getConnection();
+
+            PreparedStatement ps = con.prepareStatement(
+                "INSERT INTO users(name,email,password) VALUES(?,?,?)"
+            );
+
+            ps.setString(1, user.getName());
+            ps.setString(2, user.getEmail());
+            ps.setString(3, user.getPassword());
+
+            int i = ps.executeUpdate();
+
+            if (i > 0) {
+                status = true;
             }
-        } catch(SQLException e){
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+
+        return status;
     }
 }
